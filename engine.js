@@ -597,7 +597,23 @@ function getSetting(key, defaultValue) {
             });
           });
           
+          // Calculate max deviation per account group
+          const groupMaxDev = {};
+          flaggedRows.forEach(row => {
+            const acc = row.Duplicate_Group;
+            const dev = row.Deviation;
+            if (groupMaxDev[acc] === undefined || dev > groupMaxDev[acc]) {
+              groupMaxDev[acc] = dev;
+            }
+          });
+          
           flaggedRows.sort((a, b) => {
+            const devA = groupMaxDev[a.Duplicate_Group];
+            const devB = groupMaxDev[b.Duplicate_Group];
+            
+            if (Math.abs(devB - devA) > 0.0001) {
+              return devB - devA;
+            }
             if (a.Duplicate_Group !== b.Duplicate_Group) {
               return a.Duplicate_Group.localeCompare(b.Duplicate_Group);
             }
