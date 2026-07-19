@@ -1,219 +1,133 @@
-# IFMS Treasury — Integrated Audit System v2.3
+# 🛡️ IFMS Data-Led Treasury Inspection & Audit Suite (v2.5)
 
-**A client-side, offline-capable audit engine for IFMS Payment Order List (POL) data.**  
-No server. No installation. Open the HTML file and audit.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://python.org)
+[![Engine](https://img.shields.io/badge/Data Engine-Polars%20%7C%20ExcelJS-mintgreen)](https://pola.rs)
+[![Platform](https://img.shields.io/badge/platform-Web%20%7C%20Windows-darkgray)](#)
 
----
+A high-performance, client-side, data-led audit and inspection suite designed for Treasury Officers, Auditors, and Financial Analysts. This suite enables deep-dive forensic analysis, fraud detection, and multi-file reconciliation across **Payment Order Lists (POL)**, **Voucher Level Classification (VLC)** data, and **Payroll Records** from Integrated Financial Management Information Systems (IFMS).
 
-## What Is This?
-
-The IFMS Treasury Integrated Audit System is a browser-based tool that analyses IFMS POL (Payment Order List) export data to automatically detect financial irregularities, duplicate payments, fraud patterns, and data quality issues — without sending data to any external server.
-
-All processing happens locally inside a Web Worker in your browser. Your data never leaves your machine.
-
----
-
-## How to Open
-
-1. Go to the folder: `D:\BUILDING and TESTING\Improving Audit Suite\Version 2.3\`
-2. Open **`standalone_audit_suite.html`** (or `index.html`) in **Firefox or Chrome**
-3. The badge in the header should show **SUITE V2.3**
-
-> **No internet required.** Works fully offline.
+> [!KEY]
+> 🔑 **Tool Access Passcode**: `2026`  
+> Enter **`2026`** when prompted at the application access screen to unlock the inspection suite.
 
 ---
 
-## Loading Your Data
+## 🌟 Key Features & Modules
 
-### Step 1 — Load Files
-Click **Load Files** or **Select Folder**.
-- Accepts: `.xlsx`, `.xls`, `.csv`, `.txt` (pipe/comma/tab delimited)
-- You can load multiple files at once — they are merged automatically
-- Duplicate rows across files are de-duplicated
-
-### Step 2 — Merge Data *(optional)*
-If you loaded split files (e.g., month-wise exports), click **Merge Data** to combine them into a single unified dataset before running checks.
-
-### Step 3 — Run Analyses
-Click **Run Analyses** or go to the **Results** tab and select individual checks to run.
-
-### Step 4 — Export
-- **Excel** — Download flagged records as a formatted `.xlsx` file
-- **ZIP (Excel)** — All check results in separate sheets, zipped
-- **ZIP (CSVs)** — Same, but as CSV files
-- **ZIP (TXTs)** — Plain text format
+### 1. 🌐 Monolithic Web Audit Suite (`Version 2.5` & `Version 2.4`)
+* **Zero-Server Client-Side Architecture**: Runs entirely in the browser using HTML5, Vanilla JavaScript, and Web Workers. Your data **never leaves your local machine**.
+* **High-Volume Data Support**: Seamlessly parses, merges, and analyzes millions of payment rows without server overhead.
+* **30+ Advanced Audit Heuristics & Rules**:
+  * **Single Account - Multiple Beneficiaries**: Detects bank accounts receiving funds under multiple distinct beneficiary names (Exact & Fuzzy Token-Sort Ratio matching).
+  * **Pension + FVC Conflict Detection**: Identifies bank accounts receiving payouts concurrently from both Pension and Contingency (FVC) heads.
+  * **High-Value PAY BILL Payments**: Flags individual pay-bill transfers exceeding safety thresholds (e.g., ₹2,00,000+).
+  * **Multi-Party Account Sharing**: Pinpoints bank accounts shared across unrelated party codes.
+  * **Composite Fraud Scoring**: Automated scoring models for *Ghost Employees* and *Vendor Fraud Signal Clusters*.
+* **Export Engine**:
+  * Direct export to styled Excel (`.xlsx`) workbooks via **ExcelJS**.
+  * Automatic ZIP split export (CSV/TXT) for datasets exceeding Excel's 1,048,576 row limit.
 
 ---
 
-## Available Audit Checks
+### 2. ⚡ Standalone DDO vs Beneficiary Matcher Tool (`ddo_beneficiary_matcher.py`)
+A dedicated Python GUI desktop application to determine if **Drawing and Disbursing Officers (DDOs)** are registered as payment beneficiaries in POL/VLC files.
 
-### 🔴 Critical / High-Value Checks
-
-| Check Name | What It Detects |
-|---|---|
-| **Duplicate Pay Bill (Same Month)** | Same account receiving multiple Pay Bill payments in the same calendar month |
-| **Duplicate Payment (No Limit)** | Same account + IFSC + amount appearing more than once in the same financial year |
-| **Cross-DDO Same Account** | One bank account receiving Pay Bills from multiple DDOs — possible ghost employee |
-| **Post-Death Payments** | Salary/Pay Bill payments continuing after a DCRG (gratuity) payment — ghost employee after retirement/death |
-| **March Rush — New Account** | Accounts whose **first-ever payment** is in March above ₹50,000 — year-end budget-exhaustion fraud |
-| **Annual Vendor Cap per DDO** | Vendors receiving more than ₹10 lakh from a single DDO in one financial year via 5+ payments |
-| **Salary Jump** | Month-on-month Pay Bill jump of more than 30% without an ARREAR/ADVANCE justification |
+* **Ultra-Fast Performance**: Built with **Polars** (Calamine engine) and multi-threaded C-extensions.
+* **Inverted Word-to-DDO Indexing Engine**: Pre-indexes over 13,000 DDO entries to skip 99.9% of non-matching personal names instantly. Processes **4,80,000+ rows in under 2 seconds**.
+* **Comprehensive Field Extraction**: Captures matched DDO details, Beneficiary Name, Similarity %, Voucher No., Date, Amount, **Account Number**, and **IFSC Code**.
+* **Customizable Matching Rules**:
+  * Adjustable Fuzzy Similarity Threshold Slider (50% – 100%).
+  * Exact Match vs. Token-Sort Fuzzy Match modes.
+* **Modern Dark UI**: Features a VS Code/IFMIS-inspired dark interface with a real-time process log console, progress bar, and instant Excel/CSV export.
 
 ---
 
-### 🟠 Important Checks
-
-| Check Name | What It Detects |
-|---|---|
-| **DDO March Rush** | DDOs spending 40%+ of annual payments in the last 15 days of March (16–31 Mar) |
-| **Rapid Succession Payments** | More than 4 payments to one account within any rolling 30-day window |
-| **Split Billing** | Multiple payments to the same vendor/DDO within a short window that cross an approval threshold |
-| **Near Approval Limits** | Payments within 5% below a sanction threshold (₹5K, ₹10K, ₹25K, ₹50K, ₹1L, ₹5L, ₹10L) |
-| **Benford's Law** | Statistical first-digit frequency analysis on non-Pay Bill payments |
-| **Round Amounts** | Round payments; amounts exactly at procurement threshold limits (₹20K, ₹50K, ₹2.5L) scored highest |
-| **TA Bills** | Cumulative TA claim per employee per DDO per year exceeding limits |
-| **FVC Bill Validation** | FVC payments below the ₹5,00,000 threshold requiring additional scrutiny |
-| **Multiple GPF/DPF Bills** | More than one GPF deduction row for the same account in the same calendar month |
-
----
-
-### 🟡 Supporting Checks
-
-| Check Name | What It Detects |
-|---|---|
-| **Same Day Payments** | Same account receiving multiple payments on the same calendar day (above ₹5,000) |
-| **Day-of-Week Concentration** | DDOs where 60%+ of payments fall on a single weekday — possible batch manipulation |
-| **Vendor Concentration** | Top-10 vendors receiving a disproportionate share (>50%) of total payments |
-| **Suspicious Beneficiary Names** | Names containing TEST, DUMMY, NULL, XXXX, TEMP, SAMPLE, or purely numeric |
-| **Inactive Account Reactivation** | Accounts dormant for 6+ months that suddenly receive payments |
-| **Cross-DDO Payments** | Payments interleaved across DDOs for the same account in a suspicious pattern |
-| **Medical Bills** | Medical reimbursement claims flagged for scrutiny |
-| **High Pay Bill** | Pay Bill payments above ₹2,00,000 in a single transaction |
-
----
-
-### 📊 Summary / Reference Reports
-
-| Check Name | What It Produces |
-|---|---|
-| **Account-Wise Total** | Total payments per bank account across the dataset |
-| **Paybill FVC Conflict** | Accounts receiving both Pay Bill and FVC — possible dual employment |
-| **Paybill + Scholarship Conflict** | Accounts receiving both Pay Bill and Grant/Scholarship |
-| **Pension + Scholarship Conflict** | Accounts receiving both Pension and Scholarship |
-| **Pension + FVC Conflict** | Accounts receiving both Pension and FVC |
-
----
-
-## Maximize Panel
-
-Click the **⤢** icon in the top-right corner of any results panel to expand it to full screen.
-Press **Escape** or click the icon again to restore.
-
----
-
-## Configurable Settings
-
-All thresholds can be adjusted without changing code. Open the **⚙ Settings** panel (gear icon, bottom-right) and override any value:
-
-| Setting Key | Default | Description |
-|---|---|---|
-| `same_day_min_amount` | 5,000 | Minimum amount for same-day duplicate check |
-| `split_billing_window_days` | 3 | Day window for split-billing detection |
-| `rapid_window_days` | 30 | Rolling window size for burst payment check |
-| `rapid_window_count` | 4 | Min payments in window to trigger burst flag |
-| `dow_concentration_pct` | 60 | % threshold for day-of-week concentration |
-| `dow_min_payments` | 50 | Minimum payments for DOW check (statistical floor) |
-| `march_new_account_limit` | 50,000 | Minimum amount for March new-account flag |
-| `annual_vendor_ddo_cap` | 10,00,000 | Max vendor payout from one DDO per year |
-| `annual_vendor_min_count` | 5 | Minimum payments to trigger vendor cap check |
-| `salary_jump_pct` | 0.30 | Relative jump threshold for salary-jump check (30%) |
-| `march_rush_pct` | 0.40 | Fraction of annual spend in last 15 days of March |
-| `vendor_min_txn_amount` | 1,000 | Minimum amount for vendor concentration analysis |
-| `approval_thresholds` | [5K…10L] | Sanction limit thresholds |
-| `approval_band_pct` | 5.0 | Proximity band (%) below each threshold |
-| `dup_window_days` | 90 | Date window for name+amount duplicate check |
-| `round_concentration_pct` | 20 | % of round amounts to trigger high-concentration warning |
-| `ta_limit_cumul` | 50,000 | Cumulative annual TA limit per employee per DDO |
-| `vendor_concentration_pct` | 50 | Top-10 vendor share (%) to trigger HIGH concentration |
-| `paybill_high_value_limit` | 2,00,000 | Pay Bill amount considered high-value |
-
----
-
-## Understanding the Output
-
-### Risk Scores
-
-| Score Range | Severity | Meaning |
-|---|---|---|
-| 80–100 | 🔴 IRREGULAR | High confidence — warrants immediate attention |
-| 60–79 | ⚠️ WARNING | Suspicious — review with supporting documents |
-| 40–59 | 🟡 REVIEW | Flag for audit scrutiny |
-| 1–39 | ℹ️ INFO | Low risk — statistical/informational |
-
-### Key Output Columns
-
-| Column | Description |
-|---|---|
-| `Account_No` | Bank account number |
-| `Beneficiary_Name` | Party/payee name |
-| `DDO_Code` | Drawing and Disbursing Officer code |
-| `DDO_Name` | DDO name |
-| `Amount` | Payment amount (₹) |
-| `Date` | Date of payment |
-| `Bill_Type` | Type of bill (PAY BILL, FVC, PENSION, etc.) |
-| `AUDIT_FLAG` | Severity label |
-| `Why_Flagged` | Short one-line reason (scannable) |
-| `AUDIT_ISSUE` | Full detailed reason with amounts, dates, context |
-| `Risk_Score` | Numeric risk score (1–100) |
-| `UTR_No` | Unique Transaction Reference |
-| `IFSC` | Bank IFSC code |
-| `Source_File` | Which input file this record came from |
-
----
-
-## Tips for Best Results
-
-1. **Load a full financial year** — Checks like Annual Vendor Cap, March Rush, and Salary Jump need 12 months of data to be meaningful.
-
-2. **Use merged/combined exports** — Load all months together rather than running checks month-wise.
-
-3. **Sort by Risk_Score descending** — Click the `Risk_Score` column header to bring highest-risk records to the top.
-
-4. **Use the search box** — Filter flagged records by account number, DDO code, or party name directly in the Results panel before exporting.
-
-5. **Check the Findings tab** — Each check produces a **Findings** summary (e.g., "DDO X: ₹1.2 Cr spent in last 15 days of March") — review this first before reading individual rows.
-
-6. **Press F12 → Console** to monitor for JavaScript errors during large dataset processing.
-
----
-
-## File Structure
+## 📁 Repository Structure
 
 ```
-Version 2.3\
-├── standalone_audit_suite.html        ← Use this for offline standalone use
-├── index.html                         ← Alternative entry point (same engine)
-├── unified_audit_suite_my working.html  ← Unified/payroll variant
-├── engine.js                          ← Standalone audit engine v2.3
-└── README.md                          ← This file
+Improving Audit Suite/
+├── index.html                           # Root Monolithic Audit Suite
+├── standalone_audit_suite.html          # Standalone Single-Page Audit Runner
+├── unified_audit_suite_my working.html  # Working Unified Audit Suite Environment
+├── ddo_beneficiary_matcher.py           # Standalone Python DDO vs Beneficiary Matcher GUI
+├── Version 2.5/
+│   ├── index.html                       # Version 2.5 Full Audit Studio
+│   ├── standalone_audit_suite.html      # Version 2.5 Standalone Edition
+│   └── unified_audit_suite_my working.html
+├── Version 2.4/
+│   ├── index.html                       # Version 2.4 Stable Edition
+│   ├── standalone_audit_suite.html
+│   └── unified_audit_suite_my working.html
+└── README.md                            # Project Documentation
 ```
 
-> All three HTML files are **self-contained** — the audit engine is embedded inside each.
+---
+
+## 🚀 Getting Started
+
+### 🌐 Running the Web Audit Suite
+No installation required!
+1. Open `Version 2.5/index.html` or `Version 2.5/standalone_audit_suite.html` directly in any modern Web Browser (Google Chrome, Microsoft Edge, or Firefox).
+2. **Enter Access Passcode**: Type `2026` when prompted to log into the application dashboard.
+3. Click **Select Files** or **Select Folder** to load your raw POL / VLC Excel files.
+4. Click **Merge Data** to consolidate datasets.
+5. Click **Run Analyses** to execute all 30+ audit checks simultaneously.
+6. Review findings on the interactive dashboard and export results via **Export Excel** or **Export ZIP**.
 
 ---
 
-## Version History
+### 🐍 Running the DDO vs Beneficiary Matcher Tool
 
-| Version | Date | Highlights |
-|---|---|---|
-| **v2.3** | July 2026 | 9 bug fixes (DDO count, GPF false positives, TA year parsing, DCRG keywords); 5 new checks (March Rush, Vendor Cap, Suspicious Names, Salary Jump, DDO Budget Exhaustion); sliding-window rapid payments; Benford's Law and Round Amounts exclude salary rows; all thresholds configurable |
-| v2.2 | Prior | Previous release |
+#### Prerequisites
+Make sure Python 3.8 or higher is installed. Install the required dependencies:
+
+```bash
+pip install polars rapidfuzz openpyxl pandas
+```
+
+#### Launching the Application
+Run the Python script directly from your terminal or command prompt:
+
+```bash
+python ddo_beneficiary_matcher.py
+```
+
+#### Workflow:
+1. **Load DDO List**: Browse and select your DDO reference text file (e.g., `ddo.txt` with standard `0100121003-Name` format).
+2. **Select POL File(s)**: Load one or more merged POL files (`.xlsx` or `.csv`).
+3. **Select Column**: Choose the column containing the beneficiary/party name (defaults to `Party Name` or `Beneficiary Name`).
+4. **Choose Matching Mode**: Set to *Fuzzy Match* (default 85% threshold) or *Exact Match*.
+5. **Run Analysis**: Click **Run Matching Analysis**. View instant matches in the interactive grid and export results using **Export Results**.
 
 ---
 
-## Known Limitations
+## 🛠️ Data Standards & Input Formats
 
-- **Date format sensitivity** — Works best with `DD-MM-YYYY` or `DD/MM/YYYY`. Ambiguous formats may be mis-parsed.
-- **Large datasets** — Files over 5 lakh rows may slow the browser. Pre-filter if needed.
-- **Holiday calendar** — Pre-loaded with Central Government + Madhya Pradesh gazetted holidays. District-level local holidays are not included.
-- **GPF keyword coverage** — Flags bills containing: `GPF`, `DPF`, `DPF/GPF`, `PROVIDENT FUND`, `PF ADVANCE`, `GPF ADVANCE`. Non-standard abbreviations may be missed.
+### DDO Reference File (`ddo.txt`)
+The DDO reference file should contain one DDO entry per line formatted as:
+```text
+0100121003-Collector (Local Election) Balaghat
+1403402008-Executive Engineer PHE Division Gwalior
+```
+
+### Merged POL / Audit Files (`.xlsx` / `.csv`)
+The suite automatically recognizes standard IFMS columns:
+* **Party / Beneficiary Name**: `Party Name`, `Beneficiary Name`, `Party_Name`
+* **Account Number**: `Account Number`, `Account No`, `Account_No`, `Bank Account No`
+* **IFSC Code**: `IFSC Code`, `IFSC`, `IFSC_Code`, `IFSC Code.`
+* **Voucher Details**: `Voucher No.`, `Raw Voucher Number`, `Voucher Date`, `Amount`
+* **DDO Information**: `DDO Code`, `DDO Name`, `DDO (VLC)`
+
+---
+
+## 🏛️ Monolithic Architecture Notice
+> [!IMPORTANT]
+> The HTML files in this repository (`index.html`, `standalone_audit_suite.html`, `unified_audit_suite_my working.html`) are designed as **standalone unminified monolithic applications**. Modifications, enhancements, and worker updates are directly patched into the unminified `<script id="audit-worker-code">` blocks and global function definitions to preserve zero-dependency distribution.
+
+---
+
+## 🤝 Contributing & License
+Contributions, feedback, and audit heuristic recommendations are welcome! Please feel free to submit issues or pull requests.
+
+This project is licensed under the **MIT License**.
